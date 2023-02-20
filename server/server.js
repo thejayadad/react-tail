@@ -6,6 +6,7 @@ require('dotenv').config();
 const cors = require("cors");
 const authRoutes = require("./routes/auth.js");
 const { loginRequired, ensureCorrectUser } = require("./middleware/auth");
+const messagesRoutes = require("./routes/message.js");
 
 
 app.use(express.json());
@@ -15,8 +16,9 @@ app.use(
     "/api/users/:id/messages",
     loginRequired,
     ensureCorrectUser,
-
+    messagesRoutes
   );
+
 
 const uri = process.env.ATLAS_URI;
 mongoose.set('strictQuery', true);
