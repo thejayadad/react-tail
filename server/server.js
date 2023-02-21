@@ -7,7 +7,10 @@ const cors = require("cors");
 const authRoutes = require("./routes/auth.js");
 const { loginRequired, ensureCorrectUser } = require("./middleware/auth");
 const messagesRoutes = require("./routes/message.js");
-
+const Message = require("./models/Message");
+const User = require("./models/User.js");
+const bodyParser = require("body-parser");
+const errorHandler = require("./handlers/error");
 
 app.use(express.json());
 app.use(cors());
@@ -29,15 +32,28 @@ connection.once('open', () => {
   console.log("MongoDB Connected");
 })
 
-app.get("/notes", async(req, res) => {
-    try {
-
-    } catch (error) {
-        console.log(error);
-    }
-})
 
 
+app.get("/api/messages", loginRequired, async function(req, res, next) {
+  try {
+    let messages = await Message.find()
+      .sort({ createdAt: "desc" })
+      .populate("user", {
+        username: true,
+        profileImageUrl: true
+      });
+    return res.status(200).json(messages);
+  } catch (err) {
+    return next(err);
+  }
+});
+app.use(function(req, res, next) {
+  let err = new Error("Not Found");
+  err.status = 404;
+  next(err);
+});
+
+app.use(errorHandler);
 
 
 app.listen(PORT, () => console.log(`Listening ${PORT}`))
